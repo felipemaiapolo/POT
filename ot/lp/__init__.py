@@ -676,11 +676,13 @@ def free_support_barycenter(measures_locations, measures_weights, X_init, b=None
     while (displacement_square_norm > stopThr and iter_count < numItermax):
 
         T_sum = nx.zeros((k, d), type_as=X_init)
-
+        Ts = []
+      
         for (measure_locations_i, measure_weights_i, weight_i) in zip(measures_locations, measures_weights, weights):
             M_i = dist(X, measure_locations_i)
             T_i = emd(b, measure_weights_i, M_i, numThreads=numThreads)
             T_sum = T_sum + weight_i * 1. / b[:, None] * nx.dot(T_i, measure_locations_i)
+            Ts.append(T_i)
 
         displacement_square_norm = nx.sum((T_sum - X) ** 2)
         if log:
@@ -695,9 +697,9 @@ def free_support_barycenter(measures_locations, measures_weights, X_init, b=None
 
     if log:
         log_dict['displacement_square_norms'] = displacement_square_norms
-        return X, log_dict
+        return X, Ts, log_dict
     else:
-        return X
+        return X, Ts
 
 
 def generalized_free_support_barycenter(X_list, a_list, P_list, n_samples_bary, Y_init=None, b=None, weights=None,
